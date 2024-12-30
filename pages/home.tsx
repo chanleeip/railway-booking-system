@@ -1,34 +1,7 @@
-'use client';
 import Link from "next/link";
-import { useEffect } from "react";
-import '@/app/globals.css'; 
-import Cookies from "js-cookie";
-import { useRouter } from "next/navigation";
-import profile from '../pages/profile';
+import '@/app/globals.css';  
 export default function HomePage() {
-
-  const router=useRouter()
-  const handleTrainBooking = () =>  {
-    const authToken = Cookies.get('authToken');
-    if (!authToken) {
-      alert('You are not signed in. Sign in or Register');
-    }
-    else{
-      router.push('/trains/TRAIN-A')
-    }
-  }
-  const profileHandling = () =>  {
-    const authToken = Cookies.get('authToken');
-    if (!authToken) {
-      alert('You are not signed in. Sign in or Register');
-    }
-    else{
-      router.push('/profile')
-      
-    }
-  }
   return (
-    
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
       {/* Navbar */}
       <header className="w-full bg-blue-500 text-white py-4">
@@ -54,26 +27,20 @@ export default function HomePage() {
             Login
           </Link>
           <Link
-            href="/register"
+            href="/signup"
             className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition"
           >
             Signup
           </Link>
-          <button
-          onClick={profileHandling}
-          className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition"
-        >
-          Profile
-          </button>
         </div>
 
         <div className="mt-8">
-        <button
-          onClick={handleTrainBooking}
-          className="bg-green-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition"
-        >
-          Go to Booking
-          </button>
+          <Link
+            href={`/trains/TRAIN-A`}
+            className="text-blue-500 hover:underline font-medium text-lg"
+          >
+            Go to Train A Booking
+          </Link>
         </div>
       </main>
 
