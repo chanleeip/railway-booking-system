@@ -28,7 +28,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     .setExpirationTime('24h')
     .sign(new TextEncoder().encode(SECRET_KEY));
           res.status(200).json({ "token":token,"username":username });
-          console.log("Logged")
+          // console.log("Logged")
         } catch (error) {
           res.status(500).json({ error: "Internal server error" });
         } finally {

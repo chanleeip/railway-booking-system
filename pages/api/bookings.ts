@@ -13,9 +13,9 @@ interface BestSeats {
 }
 async function verifyToken(token: string,res:NextApiResponse):Promise<JWTPayload | "Invalid Token">{
     try {
-        console.log(token)
+        // console.log(token)
         const { payload } = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
-        console.log(payload)
+        // console.log(payload)
         return payload;
     } catch (error) {
         // console.log(error)

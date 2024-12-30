@@ -21,7 +21,7 @@ export default function LoginPage() {
 
     if (response.ok) {
       const { token,username } = await response.json() 
-      console.log(token)
+      // console.log(token)
       Cookies.set('authToken', token, { expires: 1, secure: false, sameSite: 'Strict' })
       Cookies.set('username', username, { expires: 1, secure: false, sameSite: 'Strict' })
       router.push({pathname: '/trains/TRAIN-A'}
