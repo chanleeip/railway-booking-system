@@ -6,6 +6,7 @@ export default function profile(){
         { ticketNumber: "1001", seatNumber: "A1" },
         { ticketNumber: "1002", seatNumber: "A2" },
         { ticketNumber: "1003", seatNumber: "B1" },
+        
       ];
     
       const [tickets, setTickets] = useState(initialTickets);
@@ -16,6 +17,6 @@ export default function profile(){
       };
     
       return (
-        <UserProfile username="gnm" tickets={tickets} onCancel={handleCancel} />
+        <UserProfile />
       );
 }

@@ -1,17 +1,20 @@
 import { PrismaClient } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
-import {jwtVerify} from 'jose';
+import {jwtVerify,JWTPayload} from 'jose';
+import { use } from "react";
+
 const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key_here'
 
 
-async function verifyToken(token: string,res:NextApiResponse) {
+async function verifyToken(token: string,res:NextApiResponse):Promise<JWTPayload | "Invalid Token">{
     try {
         console.log(token)
         const { payload } = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
+        console.log(payload)
         return payload;
     } catch (error) {
-        console.log(error)
-        res.status(422).send('Invalid or expired token');
+        // console.log(error)
+       return "Invalid Token"
     }
 }
 
@@ -28,6 +31,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
             // Verify the JWT token
             const username = await verifyToken(token,res);
+            if (username=="Invalid Token"){
+                return res.send("Invalid Token")
+            }
         if (req.method === "GET") {
             const ticket_details= await prisma.bookings.findMany({
                 where:{

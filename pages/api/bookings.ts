@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
 import {jwtVerify} from 'jose';
+import { JWTPayload } from "jose";
 const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key_here'
 
 interface SeatRow {
@@ -10,14 +11,15 @@ interface SeatRow {
 interface BestSeats {
     seats: number[];
 }
-async function verifyToken(token: string,res:NextApiResponse) {
+async function verifyToken(token: string,res:NextApiResponse):Promise<JWTPayload | "Invalid Token">{
     try {
         console.log(token)
         const { payload } = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
+        console.log(payload)
         return payload;
     } catch (error) {
-        console.log(error)
-        res.status(422).send('Invalid or expired token');
+        // console.log(error)
+       return "Invalid Token"
     }
 }
 
@@ -41,19 +43,20 @@ async function find_best_seats(rows: SeatRow, num_seats: number): Promise<BestSe
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     const prisma = new PrismaClient();
     try {
-        const token = req.headers.authorization?.split(' ')[1]; // Extract JWT from Authorization header
-
+        const token = req.headers.authorization?.split(' ')[1]; 
             if (!token) {
                 return res.status(401).send("Authorization token is required");
             }
 
             // Verify the JWT token
             const username = await verifyToken(token,res);
+            if (username=="Invalid Token"){
+                return res.status(400).send("Invalid Token")
+            }
         if (req.method === "POST") {
 
             const { ticket_count, train_no } = req.body;
-
-            if (!ticket_count || !username?.username || !train_no) {
+            if (!ticket_count || !train_no) {
                 return res.status(422).send("Missing attributes");
             }
 
@@ -61,7 +64,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 return res.status(422).send("Cannot book more than 7 tickets at the same time");
             }
 
-            const user_id = username?.id
+            const user_id = typeof username === 'object' && username !== null ? username.id : null;
 
             if (!user_id) {
                 return res.status(404).json({ message: "User not found" });
@@ -121,21 +124,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
             return res.json({ message: "Booking successful", booked_seats });
         }
-        else if(req.method=='GET'){
-            const {train_no}=req.query
+            else if(req.method == 'GET') {
+            const { train_no } = req.query;
+            // console.log(train_no)
             if (!train_no) {
                 return res.status(400).send("Train number is required");
             }
-            let available_seats_count=await prisma.seats.findMany({
-                where:{
-                    train_no:Number(train_no),
-                    is_booked:false
+            let available_seats_count = await prisma.seats.findMany({
+                where: {
+                    train_no: Number(train_no),
+                    is_booked: false
                 },
-                select:{
-                    seat_number:true
+                select: {
+                    seat_number: true
                 }
-            })
-            res.json({"count":available_seats_count.length,"seats":available_seats_count}) 
+            });
+            return res.json({ "count": available_seats_count.length, "seats": available_seats_count });
         }
         else if(req.method=='DELETE'){
             const {ticket_id}=req.query

@@ -13,7 +13,7 @@ export default function TrainPage(){
       const cookieUsername = Cookies.get('username');
       setUsername(cookieUsername || ""); 
     }, []);
-    const trainNo = "100";
+    const trainNo = 1000;
     const trainName = "TRAIN-A";
     return(
         <div>

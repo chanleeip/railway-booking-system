@@ -15,19 +15,19 @@ export function middleware(req: NextRequest) {
 
 
   const authToken = req.cookies.get('authToken');
-  console.log(authToken)
+  // console.log(authToken)
   if (!authToken) {
     const loginUrl = new URL('/', req.url);
     return NextResponse.redirect(loginUrl);
   }
   else{
   try {
-    console.log(authToken)
+    // console.log(authToken)
     const decoded = jwtVerify(authToken.value, new TextEncoder().encode(SECRET_KEY)); // Validate the token
-    console.log('Token is valid:', decoded);
+    // console.log('Token is valid:', decoded);
     return NextResponse.next(); 
   } catch (error:any) {
-    console.error('Invalid token:', error.message);
+    // console.error('Invalid token:', error.message);
     // Redirect to home page on invalid token
     const homeUrl = new URL('/', req.url);
     return NextResponse.redirect(homeUrl);
