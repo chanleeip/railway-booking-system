@@ -70,23 +70,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 return res.status(404).json({ message: "User not found" });
             }
 
-            const booked_seats = await prisma.$transaction(async (tx) => {
-                const available_tickets = await tx.seats.findMany({
-                    where: { train_no: train_no, is_booked: false },
-                    select: { seat_id: true, seat_number: true },
-                    orderBy: { seat_number: 'asc' },
-                });
+                const booked_seats = await prisma.$transaction(async (tx) => {
+                    const available_tickets = await tx.seats.findMany({
+                        where: { train_no: train_no, is_booked: false },
+                        select: { seat_id: true, seat_number: true },
+                        orderBy: { seat_number: 'asc' },
+                    });
 
-                if (available_tickets.length < ticket_count) {
-                    throw new Error("Seats not available");
-                }
-
-                let rows: SeatRow = {};
-                available_tickets.forEach(({ seat_id, seat_number }) => {
-                    const currentRow = seat_number >= 77 && seat_number <= 80 ? 12 : Math.ceil(seat_number / 7);
-                    if (!rows[currentRow]) {
-                        rows[currentRow] = [];
+                    if (available_tickets.length < ticket_count) {
+                        throw new Error("Seats not available");
                     }
+
+                    let rows: SeatRow = {};
+                    available_tickets.forEach(({ seat_id, seat_number }) => {
+                        const currentRow = seat_number >= 77 && seat_number <= 80 ? 12 : Math.ceil(seat_number / 7);
+                        if (!rows[currentRow]) {
+                            rows[currentRow] = [];
+                        }
                     rows[currentRow].push(seat_id);
                 });
 
