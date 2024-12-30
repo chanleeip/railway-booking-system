@@ -1,24 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
 import axios from 'axios';
-import { useRouter } from 'next/router'; // Import useRouter from next/router
+import { useRouter } from 'next/router';
+
+// Define the Ticket and Profile types for type safety
+interface Ticket {
+  ticket_id: string;
+  train_no: string;
+  tickets_count: number;
+  createdAt: string;
+  updatedAt: string;
+  status: string;
+}
+
+interface Profile {
+  username: string;
+  ticket_details: Ticket[];
+}
 
 const Profile = () => {
-  const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   const router = useRouter(); // Initialize useRouter hook for navigation
 
   // Function to handle the ticket cancellation
-  const cancelTicket = async (ticket_id) => {
+  const cancelTicket = async (ticket_id: string) => {
     try {
-      const token = Cookies.get("authToken");
+      const token = Cookies.get('authToken');
       const config = {
         headers: {
           Authorization: `Bearer ${token}`,
-          "Cache-Control": "no-cache",
-        }
+          'Cache-Control': 'no-cache',
+        },
       };
 
       // Send the cancellation request using axios
@@ -30,6 +45,8 @@ const Profile = () => {
 
       // Update the profile state with the new ticket status
       setProfile((prevProfile) => {
+        if (!prevProfile) return prevProfile;
+
         const updatedTicketDetails = prevProfile.ticket_details.map((ticket) => {
           if (ticket.ticket_id === ticket_id) {
             return { ...ticket, status: 'CANCELLED' };
@@ -39,7 +56,7 @@ const Profile = () => {
 
         return { ...prevProfile, ticket_details: updatedTicketDetails };
       });
-    } catch (err) {
+    } catch (err: any) {
       setError(err.message);
     }
   };
@@ -48,13 +65,14 @@ const Profile = () => {
     // Fetch the profile data from the API
     const fetchProfileData = async () => {
       try {
-        const token = Cookies.get("authToken");
+        const token = Cookies.get('authToken');
         const config = {
           headers: {
             Authorization: `Bearer ${token}`,
-            "Cache-Control": "no-cache",
+            'Cache-Control': 'no-cache',
           },
         };
+
         const res = await axios.get('/api/profile', config);
 
         if (res.status !== 200) {
@@ -62,8 +80,8 @@ const Profile = () => {
         }
 
         setProfile(res.data);
-      } catch (err) {
-        setError(err.message);
+      } catch (err:unknown) {
+        setError("error");
       } finally {
         setLoading(false);
       }
@@ -85,17 +103,17 @@ const Profile = () => {
       >
         Back to Home
       </button>
-      
+
       <h1 className="text-2xl font-semibold mb-4 text-black">Profile: {profile.username}</h1>
-      
+
       <div className="space-y-6">
         {profile.ticket_details.map((ticket) => (
           <div key={ticket.ticket_id} className="border-b pb-4">
             <h2 className="text-xl font-medium text-black">Ticket ID: {ticket.ticket_id}</h2>
             <div className="flex justify-between mb-4 text-black-600">
-              <p className="text-black">Train No: {ticket.train_no}</p> {/* Set train no color to black */}
+              <p className="text-black">Train No: {ticket.train_no}</p>
               <p>Status: 
-                <span className={`font-semibold ${ticket.status === "BOOKED" ? 'text-green-500' : 'text-red-500'}`}>
+                <span className={`font-semibold ${ticket.status === 'BOOKED' ? 'text-green-500' : 'text-red-500'}`}>
                   {ticket.status}
                 </span>
               </p>
@@ -107,7 +125,7 @@ const Profile = () => {
             <div className="flex justify-between text-gray-500">
               <p>Updated At: {new Date(ticket.updatedAt).toLocaleString()}</p>
             </div>
-            
+
             {/* Show Cancel button only for BOOKED status */}
             {ticket.status === 'BOOKED' && (
               <button
